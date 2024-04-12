@@ -1,6 +1,5 @@
 import express from "express"
 import postRoute from './routes/post.route.js'
-
 import authRoute from './routes/auth.route.js'
 const port = 3000
 const app = express()

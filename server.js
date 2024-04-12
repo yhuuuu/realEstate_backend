@@ -1,8 +1,11 @@
-import express from "express"
+import express, { json } from "express"
 import postRoute from './routes/post.route.js'
 import authRoute from './routes/auth.route.js'
 const port = 3000
 const app = express()
+
+// Middleware to parse JSON bodies
+app.use(express.json())
 
 app.use('/api/posts', postRoute)
 app.use('/api/auth', authRoute)

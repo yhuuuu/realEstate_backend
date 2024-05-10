@@ -1,5 +1,8 @@
-import express from 'express'
+/**
+ * API request for post routes 
+ */
 
+import express from 'express'
 const router = express.Router()
 
 router.get("/test", (req, res) => {

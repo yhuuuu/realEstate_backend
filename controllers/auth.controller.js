@@ -1,17 +1,40 @@
+/**
+ * Authentication function for auth routes
+ */
 import bcrypt, { hash } from 'bcrypt'
 import prisma from '../lib/prisma.js';
 import jwt from "jsonwebtoken"
 
+/**
+ * 
+ * Register
+ */
 export const register = async (req, res) => {
+    /**
+     * We are using body to make the request
+     * if console.log(req.body) --> undefined  
+     * because it needs include "app.use(express.json())" in order to send json object
+     */
+    const { username, email, password } = req.body  //deconstruct the body
 
-    const { username, email, password } = req.body
     try {
-        //HASH the Password
+        /**
+         * --- HASH THE PASSWORD ---
+         * To make the password not visible in db
+         * And using brypt to hash pd from the user
+         * The hash function is a async function
+         * Install and impost prisma package to save the body req in the MongoDB
+         * npx prisma init --data source-provider mongodb
+         */
         const hasedPassword = await bcrypt.hash(password, 10)
         console.log(hasedPassword);
-        //Create a new user and save to db
-        //calling the users model
-        //useing the create
+
+        /**
+         * --- CREATE A NEW USER AND SAVE TO DB ---
+         * Install and import bcrypt package
+         * Calling the user model
+         * 
+         */
         const newUser = await prisma.user.create({
             data: {
                 username,
@@ -29,12 +52,18 @@ export const register = async (req, res) => {
     }
 }
 
+/**
+ * 
+ *  Login
+ */
 export const login = async (req, res) => {
-    //get the username and password from the body
+
+
+    //Getthe username and password from the body
     const { username, password } = req.body;
 
     try {
-        //Check if the users exists- username is unique
+        //Check if the users exists- username should be unique
         const user = await prisma.user.findUnique({
             where: { username } //username:username
         })
@@ -44,9 +73,14 @@ export const login = async (req, res) => {
         }
 
 
-        //Check if the password is correct
-        //Compare database password(bcrypt) with user input password
-        //The bcrypt.compare() function internally hashes the plaintext password provided by the user using the same hashing algorithm and salt as the stored hashed password. It then compares the resulting hash with the stored hashed password.
+        /**
+         * Check if the password is correct
+         * Compare database password(bcrypt) with user input password
+         * The bcrypt.compare() function internally hashes the plaintext password
+         * provided by the user using the same hashing algorithm and salt as the 
+         * stored hashed password. It then compares the resulting hash with the
+         * stored hashed password
+         */
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
@@ -54,24 +88,24 @@ export const login = async (req, res) => {
         }
 
 
-        // //If username and password is correct, generate cookie token and send to the user
+        //If username and password is correct, generate cookie token and send to the user
         // res.setHeader("Set-Cookie","test=" + "myValue").json("success")
+        
         const age = 1000 * 60 * 60 * 24 * 7
-
         //storage userid within token and pass it to cookie
-        const token = jwt.sign(
+        const token = jwt.sign( //sign function to pass in user information
             {
                 id: user.id
             },
             process.env.JWT_SECRET_KEY,
-            { expiresIn: age })
+            { expiresIn: age }
+        );
 
-
-        //cookie-parser library
-        //if a users wants to deleted a post, can user token within cookies to check if the users is valid 
+        //Install cookie-parser package
+        //If a users wants to deleted a post, can user token within cookies to check if the users is valid 
         res.cookie("token", token, {
             httpOnly: true,
-            // secure: true
+            // secure: true //prodution mode must be true
             maxAge: age,
 
         })

@@ -15,7 +15,7 @@ export const register = async (req, res) => {
      * if console.log(req.body) --> undefined  
      * because it needs include "app.use(express.json())" in order to send json object
      */
-    const { username, email, password } = req.body  //deconstruct the body
+    const { username, email, password } = req.body;  //deconstruct the body
 
     try {
         /**
